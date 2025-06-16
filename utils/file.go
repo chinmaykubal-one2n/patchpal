@@ -10,7 +10,9 @@ import (
 
 // SaveUploadedFile saves the uploaded file to /tmp and returns the file path
 func SaveUploadedFile(file *multipart.FileHeader) (string, error) {
-	dst := filepath.Join(os.TempDir(), fmt.Sprintf("patchpal-%d-%s", time.Now().UnixNano(), filepath.Base(file.Filename)))
+	const tmpDir = "/home/one2n/Desktop/patchpal_files" // trivy is failing in dir /tmp
+
+	dst := filepath.Join(tmpDir, fmt.Sprintf("patchpal-%d-%s", time.Now().UnixNano(), filepath.Base(file.Filename)))
 	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
 		return "", err
 	}

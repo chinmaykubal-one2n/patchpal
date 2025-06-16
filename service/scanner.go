@@ -15,13 +15,14 @@ type TrivyResult map[string]interface{}
 
 // ScanWithTrivy runs a Trivy config scan on the given file and returns the parsed JSON output
 func ScanWithTrivy(filePath string) (TrivyResult, error) {
+	const tmpDir = "/home/one2n/Desktop/patchpal_out" // trivy is failing in dir /tmp
 	// Ensure Trivy is installed
 	if _, err := exec.LookPath("trivy"); err != nil {
 		return nil, fmt.Errorf("trivy not found: %v", err)
 	}
 
 	// Prepare output file path
-	outputFile := filepath.Join(os.TempDir(), fmt.Sprintf("trivy-out-%d.json", time.Now().UnixNano()))
+	outputFile := filepath.Join(tmpDir, fmt.Sprintf("trivy-out-%d.json", time.Now().UnixNano()))
 
 	// Run the Trivy command
 	cmd := exec.Command(

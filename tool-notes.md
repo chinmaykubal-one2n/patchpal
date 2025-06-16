@@ -25,4 +25,4 @@ POINTS TO REMEMBER (LIMITATIONS)
 
 <!-- test file upload -->
 curl -X POST -F 'file=@yourfile.yaml' http://localhost:8080/fix
-curl -X POST -F 'file=@vulnerable-manifests/k8s-manifets.yml' http://localhost:8080/fix
+curl -X POST -F 'file=@k8s-manifets.yml' http://localhost:8080/fix

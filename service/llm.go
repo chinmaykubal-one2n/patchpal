@@ -22,7 +22,7 @@ func NewLLMService(apiKey string, model string) *LLMService {
 }
 
 func (l *LLMService) FixK8sManifest(ctx context.Context, vulnReport string, originalYAML string) (string, error) {
-	fmt.Printf("Fixing Kubernetes manifest using LLM...", vulnReport)
+	fmt.Println("Fixing Kubernetes manifest using LLM...", vulnReport)
 	prompt := fmt.Sprintf(`
 You are a Kubernetes security expert.
 

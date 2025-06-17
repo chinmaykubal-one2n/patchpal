@@ -43,8 +43,8 @@ func FormatMisconfigsAsPrompt(misconfigs []SimplifiedMisconfig) string {
 	var b strings.Builder
 	for i, m := range misconfigs {
 		fmt.Fprintf(&b, "Issue #%d:\n", i+1)
-		fmt.Fprintf(&b, "ID: %s\nTitle: %s\nDescription: %s\nSeverity: %s\nResolution: %s\n\n",
-			m.ID, m.Title, m.Message, m.Severity, m.Resolution)
+		fmt.Fprintf(&b, "ID: %s\nTitle: %s\nDescription: %s\nSeverity: %s\nResolution: %s\n", m.ID, m.Title, m.Message, m.Severity, m.Resolution)
+		fmt.Fprintln(&b)
 	}
 	return b.String()
 }
@@ -66,6 +66,11 @@ func ExtractRelevantMisconfigs(jsonPath string) ([]SimplifiedMisconfig, error) {
 			continue
 		}
 		for _, m := range result.Misconfigurations {
+			// Skip LOW and UNKNOWN severity
+			if m.Severity == "LOW" || m.Severity == "UNKNOWN" {
+				continue
+			}
+
 			var lines []string
 			for _, l := range m.CauseMetadata.Code.Lines {
 				if l.IsCause && strings.TrimSpace(l.Content) != "" {

@@ -47,7 +47,7 @@ func HandleFix(c *gin.Context) {
 	ctx := context.Background()
 
 	// Step 6: Call FixK8sManifest to get the fixed YAML
-	fixedYaml, err := llm.FixK8sManifest(ctx, savedPath, prompt)
+	fixedYaml, err := llm.FixK8sManifest(ctx, prompt, savedPath)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fix manifest", "details": err.Error()})
 		return

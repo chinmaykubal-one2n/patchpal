@@ -27,12 +27,9 @@ func (l *LLMService) FixK8sManifest(ctx context.Context, vulnReport string, orig
 You are a Kubernetes security expert.
 
 Your task is to fix ONLY the misconfigurations listed below in the given Kubernetes YAML manifest. 
-DO NOT modify any other field. Preserve formatting, structure, comments, labels, images, ports, and resource requests.
+DO NOT modify any other field.  
 
 Only fix misconfigurations with severity HIGH, CRITICAL, or MEDIUM — ignore all others.
-
-Each issue includes an ID, severity, description, and resolution.
-
 ---
 Misconfiguration Report:
 

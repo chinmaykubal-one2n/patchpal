@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: vulnerable-root
+  name: nginx-app
 spec:
   selector:
     matchLabels:
-      app: vulnerable-root
+      app: nginx-app
   template:
     metadata:
       labels:
-        app: vulnerable-root
+        app: nginx-app
     spec:
       containers:
-      - name: vulnerable-root
+      - name: nginx-app
         image: nginx:latest
         securityContext:
           runAsUser: 0 # root user

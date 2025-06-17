@@ -14,6 +14,7 @@ type TrivyReport struct {
 		Misconfigurations []struct {
 			ID            string `json:"ID"`
 			Title         string `json:"Title"`
+			Description   string `json:"Description"`
 			Message       string `json:"Message"`
 			Resolution    string `json:"Resolution"`
 			Severity      string `json:"Severity"`
@@ -31,19 +32,19 @@ type TrivyReport struct {
 }
 
 type SimplifiedMisconfig struct {
-	ID         string   `json:"id"`
-	Title      string   `json:"title"`
-	Message    string   `json:"message"`
-	Resolution string   `json:"resolution"`
-	Severity   string   `json:"severity"`
-	CodeLines  []string `json:"code_lines"`
+	ID          string   `json:"id"`
+	Title       string   `json:"title"`
+	Description string   `json:"description"`
+	Message     string   `json:"message"`
+	Resolution  string   `json:"resolution"`
+	Severity    string   `json:"severity"`
+	CodeLines   []string `json:"code_lines"`
 }
 
 func FormatMisconfigsAsPrompt(misconfigs []SimplifiedMisconfig) string {
 	var b strings.Builder
-	for i, m := range misconfigs {
-		fmt.Fprintf(&b, "Issue #%d:\n", i+1)
-		fmt.Fprintf(&b, "ID: %s\nTitle: %s\nDescription: %s\nSeverity: %s\nResolution: %s\n", m.ID, m.Title, m.Message, m.Severity, m.Resolution)
+	for _, m := range misconfigs {
+		fmt.Fprintf(&b, "Description: %s\nMessage: %s\nSeverity: %s\nResolution: %s\n", m.Description, m.Message, m.Severity, m.Resolution)
 		fmt.Fprintln(&b)
 	}
 	return b.String()
@@ -79,12 +80,13 @@ func ExtractRelevantMisconfigs(jsonPath string) ([]SimplifiedMisconfig, error) {
 			}
 
 			misconfigs = append(misconfigs, SimplifiedMisconfig{
-				ID:         m.ID,
-				Title:      m.Title,
-				Message:    m.Message,
-				Resolution: m.Resolution,
-				Severity:   m.Severity,
-				CodeLines:  lines,
+				ID:          m.ID,
+				Title:       m.Title,
+				Description: m.Description,
+				Message:     m.Message,
+				Resolution:  m.Resolution,
+				Severity:    m.Severity,
+				CodeLines:   lines,
 			})
 		}
 	}

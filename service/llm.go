@@ -22,16 +22,32 @@ func NewLLMService(apiKey string, model string) *LLMService {
 }
 
 func (l *LLMService) FixK8sManifest(ctx context.Context, vulnReport string, originalYAML string) (string, error) {
-	prompt := fmt.Sprintf(`You are an expert in Kubernetes security. 
-Given the following K8s YAML manifest and the Trivy scan results, suggest a fixed version of the manifest that resolves the issues.
+	fmt.Printf("Fixing Kubernetes manifest using LLM...", vulnReport)
+	prompt := fmt.Sprintf(`
+You are a Kubernetes security expert.
 
-Trivy Report (JSON):
+Your task is to fix ONLY the misconfigurations listed below in the given Kubernetes YAML manifest. 
+DO NOT modify any other field. Preserve formatting, structure, comments, labels, images, ports, and resource requests.
+
+Only fix misconfigurations with severity HIGH, CRITICAL, or MEDIUM — ignore all others.
+
+Each issue includes an ID, severity, description, and resolution.
+
+---
+Misconfiguration Report:
+
 %s
+---
 
 Original YAML:
+
 %s
 
-Respond with only the corrected YAML.`, vulnReport, originalYAML)
+Rules:
+1. Fix ONLY what's required by the issues above.
+2. Do NOT remove or add unrelated fields.
+3. Output only the fixed YAML — no markdown, no explanations, no extra text.
+`, vulnReport, originalYAML)
 
 	req := openai.ChatCompletionRequest{
 		Model: l.Model,

@@ -68,7 +68,7 @@ func ExtractRelevantMisconfigs(jsonPath string) ([]SimplifiedMisconfig, error) {
 		}
 		for _, m := range result.Misconfigurations {
 			// Skip LOW and UNKNOWN severity
-			if m.Severity == "LOW" || m.Severity == "UNKNOWN" {
+			if m.Severity == "LOW" || m.Severity == "UNKNOWN" || m.Severity == "MEDIUM" {
 				continue
 			}
 

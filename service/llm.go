@@ -27,10 +27,10 @@ func (l *LLMService) FixK8sManifest(ctx context.Context, vulnReport string, orig
 Understand Description, Message and based on Resolution make exact changes to given YAML file and nothing else, do not do anything extra to file, do not remove anything that does not concern with the trivy report.
 
 ---
-Misconfiguration Report:
+This is a trivy report:
 %s
 ---
-Original YAML:
+For the this manifest:
 %s
 `, vulnReport, originalYAML)
 
@@ -41,7 +41,7 @@ Original YAML:
 		Messages: []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleSystem,
-				Content: `You are a Kubernetes YAML security linter.  Your ONLY task is to correct the misconfigurations reported. DO NOT explain. DO NOT use markdown. DO NOT add comments. DO NOT return anything other than plain corrected YAML.`,
+				Content: `Fix the manifest with respect to the Resolution suggested in the report and give me updated manifest. DO NOT explain. DO NOT use markdown. DO NOT add comments. DO NOT return anything other than plain corrected YAML.`,
 			},
 			{
 				Role:    openai.ChatMessageRoleUser,

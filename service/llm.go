@@ -24,31 +24,25 @@ func NewLLMService(apiKey string, model string) *LLMService {
 func (l *LLMService) FixK8sManifest(ctx context.Context, vulnReport string, originalYAML string) (string, error) {
 	fmt.Println("Fixing Kubernetes manifest using LLM...", vulnReport)
 	prompt := fmt.Sprintf(`
-You are a Kubernetes security expert.
+Understand Description, Message and based on Resolution make exact changes to given YAML file and nothing else, do not do anything extra to file, do not remove anything that does not concern with the trivy report.
 
-Your task is to fix ONLY the misconfigurations listed below in the given Kubernetes YAML manifest. 
-DO NOT modify any other field.  
-
-Only fix misconfigurations with severity HIGH, CRITICAL, or MEDIUM — ignore all others.
 ---
 Misconfiguration Report:
-
 %s
 ---
-
 Original YAML:
-
 %s
-
-Rules:
-1. Fix ONLY what's required by the issues above.
-2. Do NOT remove or add unrelated fields.
-3. Output only the fixed YAML — no markdown, no explanations, no extra text.
 `, vulnReport, originalYAML)
 
 	req := openai.ChatCompletionRequest{
-		Model: l.Model,
+		Model:       l.Model,
+		Temperature: 0,
+		TopP:        1,
 		Messages: []openai.ChatCompletionMessage{
+			{
+				Role:    openai.ChatMessageRoleSystem,
+				Content: `You are a Kubernetes YAML security linter.  Your ONLY task is to correct the misconfigurations reported. DO NOT explain. DO NOT use markdown. DO NOT add comments. DO NOT return anything other than plain corrected YAML.`,
+			},
 			{
 				Role:    openai.ChatMessageRoleUser,
 				Content: prompt,

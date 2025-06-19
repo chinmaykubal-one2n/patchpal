@@ -2,9 +2,7 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"net/http"
-	"os"
 	"patchpal/config"
 	"patchpal/parser"
 	"patchpal/service"
@@ -73,60 +71,7 @@ func HandleFix(c *gin.Context) {
 
 	// Step 9: Return PR URL and fixed YAML
 	c.JSON(http.StatusOK, gin.H{
-		"pr_url":     prURL,
-		"fixed_yaml": fixedYaml,
+		"pr_url": prURL,
+		// "fixed_yaml": fixedYaml,
 	})
-}
-
-func HandleFix1(c *gin.Context) {
-	// Step 1: Accept uploaded file
-	file, err := c.FormFile("file")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "File not provided"})
-		return
-	}
-
-	// Step 2: Save file
-	savedPath, err := utils.SaveUploadedFile(file)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save uploaded file"})
-		return
-	}
-
-	// Step 3: Run Trivy Scan
-	trivyOutputPath, err := service.ScanWithTrivy(savedPath)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Trivy scan failed", "details": err.Error()})
-		return
-	}
-
-	// Step 4: Parse relevant misconfigurations
-	misconfigs, err := parser.ExtractRelevantMisconfigs(trivyOutputPath)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse misconfigs", "details": err.Error()})
-		return
-	}
-
-	// Step 5: Initialize LLM service
-	llm := service.NewLLMService(os.Getenv("OPENROUTER_API_KEY"), os.Getenv("MODEL"))
-
-	prompt := parser.FormatMisconfigsAsPrompt(misconfigs)
-	ctx := context.Background()
-
-	// Step 6: Call FixK8sManifest to get the fixed YAML
-	fixedYaml, err := llm.FixK8sManifest(ctx, prompt, savedPath)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fix manifest", "details": err.Error()})
-		return
-	}
-	// Step 7: Save fixed YAML to a file
-	fixedPath, err := utils.SaveFixedManifest(fixedYaml, file.Filename)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save fixed YAML", "details": err.Error()})
-		return
-	}
-	fmt.Println("Fixed manifest saved at:", fixedPath)
-
-	// Step 8: Return fixed YAML
-	c.Data(http.StatusOK, "text/yaml", []byte(fixedYaml))
 }

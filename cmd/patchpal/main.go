@@ -2,14 +2,14 @@ package main
 
 import (
 	"patchpal/api"
+	"patchpal/config"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	// Load env variables if .env file exists
-	_ = godotenv.Load()
+	// Load environment variables into config
+	config.LoadEnv()
 
 	r := gin.Default()
 

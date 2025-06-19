@@ -34,3 +34,25 @@ func readUploadedFile(file *multipart.FileHeader) []byte {
 	f.Read(data)
 	return data
 }
+
+// SaveFixedManifest saves the fixed YAML content to a specific directory and returns the path
+func SaveFixedManifest(yamlContent string, originalFilename string) (string, error) {
+	const outputDir = "/home/one2n/Desktop/patchpal_out"
+
+	// Ensure directory exists
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return "", fmt.Errorf("failed to create output directory: %w", err)
+	}
+
+	// Create a unique filename based on timestamp
+	basename := filepath.Base(originalFilename)
+	fixedName := fmt.Sprintf("fixed-%d-%s", time.Now().UnixNano(), basename)
+	outputPath := filepath.Join(outputDir, fixedName)
+
+	// Write YAML content to file
+	if err := os.WriteFile(outputPath, []byte(yamlContent), 0644); err != nil {
+		return "", fmt.Errorf("failed to write fixed manifest: %w", err)
+	}
+
+	return outputPath, nil
+}

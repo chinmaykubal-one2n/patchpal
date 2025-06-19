@@ -80,7 +80,7 @@ func CreatePRWithFixedYAML(fixedFilePath, originalFilename string) (string, erro
 	// Step 5: Push
 	err = r.Push(&git.PushOptions{
 		Auth: &http.BasicAuth{
-			Username: "PatchPal Bot", // Can be anything except blank
+			Username: githubOwner, // Can be anything except blank
 			Password: githubToken,
 		},
 	})

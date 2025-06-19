@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"patchpal/config"
 	"patchpal/parser"
 	"patchpal/service"
 	"patchpal/utils"
@@ -44,7 +45,7 @@ func HandleFix(c *gin.Context) {
 	}
 
 	// Step 5: Initialize LLM service
-	llm := service.NewLLMService(os.Getenv("OPENROUTER_API_KEY"), os.Getenv("MODEL"))
+	llm := service.NewLLMService(config.Config.OpenRouterAPIKey, config.Config.Model)
 
 	prompt := parser.FormatMisconfigsAsPrompt(misconfigs)
 	ctx := context.Background()

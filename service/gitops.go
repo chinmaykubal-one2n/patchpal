@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"patchpal/config"
 	"path/filepath"
 	"time"
 
@@ -16,10 +17,10 @@ import (
 )
 
 var (
-	repoPath       = os.Getenv("REPO_PATH")
-	githubOwner    = os.Getenv("GITHUB_OWNER")
-	githubRepo     = os.Getenv("GITHUB_REPO")
-	githubToken    = os.Getenv("GITHUB_TOKEN")
+	repoPath       = config.Config.RepoPath
+	githubOwner    = config.Config.GithubOwner
+	githubRepo     = config.Config.GithubRepo
+	githubToken    = config.Config.GithubToken
 	commitAuthor   = &object.Signature{Name: "PatchPal Bot", Email: "bot@patchpal.io", When: time.Now()}
 	prBranchPrefix = "patchpal-fix"
 )

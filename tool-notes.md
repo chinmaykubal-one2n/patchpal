@@ -144,3 +144,8 @@ Want me to regenerate your full final `FixK8sManifest` function with these best 
 WILL FIX MODEL ACCURACY LATER SPENT TOO MUCH TIME IN IT, FOR NOW LETS FOCUS ON THE REMAINING WORKFLOW.
 
 curl -X POST -F 'file=@./vulnerable-manifests/k8s-manifets.yml' http://localhost:8080/fix
+
+
+NEXT TARGET:-
+1. INSTEAD OF SENDING FILE, SEND REPO, WHERE MULTIPLE FILES MIGHT HAVE BEEN MODIFIED.
+2. AND NEW FILE(S) WILL BE ADDED TO THE RESPECTIVE LOCATION.

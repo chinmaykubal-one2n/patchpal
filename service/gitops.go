@@ -13,14 +13,14 @@ import (
 	"golang.org/x/oauth2"
 )
 
-var (
-	repoPath    = config.Config.RepoPath
-	githubOwner = config.Config.GithubOwner
-	githubRepo  = config.Config.GithubRepo
-	githubToken = config.Config.GithubToken
-)
-
 func CreatePRWithFixedYAML(fixedFilePath, originalFilename string) (string, error) {
+	var (
+		repoPath    = config.Config.RepoPath
+		githubOwner = config.Config.GithubOwner
+		githubRepo  = config.Config.GithubRepo
+		githubToken = config.Config.GithubToken
+	)
+
 	ctx := context.Background()
 	branchName := fmt.Sprintf("patchpal-fix-%d", time.Now().Unix())
 

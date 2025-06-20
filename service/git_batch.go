@@ -5,21 +5,20 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"patchpal/config"
 	"path/filepath"
 	"time"
+
+	"patchpal/config"
 
 	"github.com/google/go-github/v57/github"
 	"golang.org/x/oauth2"
 )
 
-func CreatePRWithFixedYAML(fixedFilePath, originalFilename string) (string, error) {
-	var (
-		repoPath    = config.Config.RepoPath
-		githubOwner = config.Config.GithubOwner
-		githubRepo  = config.Config.GithubRepo
-		githubToken = config.Config.GithubToken
-	)
+func CreateBatchPR(fixedFiles []string) (string, error) {
+	repoPath := config.Config.RepoPath
+	githubOwner := config.Config.GithubOwner
+	githubRepo := config.Config.GithubRepo
+	githubToken := config.Config.GithubToken
 
 	ctx := context.Background()
 	branchName := fmt.Sprintf("patchpal-fix-%d", time.Now().Unix())
@@ -29,35 +28,34 @@ func CreatePRWithFixedYAML(fixedFilePath, originalFilename string) (string, erro
 		return "", fmt.Errorf("failed to checkout new branch: %w", err)
 	}
 
-	// Step 2: Replace the file in repo
-	destPath := filepath.Join(repoPath, originalFilename)
-	srcData, err := os.ReadFile(fixedFilePath)
-	if err != nil {
-		return "", fmt.Errorf("failed to read fixed file: %w", err)
-	}
-	if err := os.WriteFile(destPath, srcData, 0644); err != nil {
-		return "", fmt.Errorf("failed to overwrite repo file: %w", err)
+	// Step 2: Add all fixed files
+	for _, file := range fixedFiles {
+		relPath, err := filepath.Rel(repoPath, file)
+		if err != nil {
+			return "", fmt.Errorf("failed to get relative path: %w", err)
+		}
+		if err := runGit(repoPath, "add", relPath); err != nil {
+			return "", fmt.Errorf("failed to add file: %s, error: %w", relPath, err)
+		}
 	}
 
-	// Step 3: Add & Commit
-	if err := runGit(repoPath, "add", originalFilename); err != nil {
-		return "", fmt.Errorf("git add failed: %w", err)
-	}
-	if err := runGit(repoPath, "commit", "-m", "fix: patch Kubernetes misconfig"); err != nil {
+	// Step 3: Commit once
+	if err := runGit(repoPath, "commit", "-m", "fix: patch Kubernetes misconfigurations"); err != nil {
 		return "", fmt.Errorf("git commit failed: %w", err)
 	}
 
-	// Step 4: Push
+	// Step 4: Push branch
 	if err := runGit(repoPath, "push", "-u", "origin", branchName); err != nil {
 		return "", fmt.Errorf("git push failed: %w", err)
 	}
 
-	// Step 5: Create PR using GitHub API
+	// Step 5: Create PR via GitHub API
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: githubToken})
 	client := github.NewClient(oauth2.NewClient(ctx, ts))
 
-	title := "PatchPal: Fix Kubernetes Misconfiguration"
-	body := "This PR contains fixes generated automatically by PatchPal for a vulnerable manifest."
+	title := "PatchPal: Fix Kubernetes Misconfigurations"
+	body := "This PR contains automated fixes for Kubernetes security misconfigurations found in multiple files."
+
 	pr := &github.NewPullRequest{
 		Title: &title,
 		Head:  &branchName,

@@ -2,11 +2,15 @@ package main
 
 import (
 	"patchpal/api"
+	"patchpal/config"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	// Load environment variables into config
+	config.LoadEnv()
+
 	r := gin.Default()
 
 	// Register API route

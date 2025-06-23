@@ -151,3 +151,120 @@ NEXT TARGET:-
 2. AND NEW FILE(S) WILL BE ADDED TO THE RESPECTIVE LOCATION.
 
 NOTE:- WE ARE SKIPPING THE LOW AND UNKNOWEN STUFF FOR NOW, SO IF LLM DOES NOT GET THE REPORT THEN PROGRAM WILL PANIC SO FIX THAT
+
+
+<!--  -->
+
+Yes — great observation. Let's break this down so you're crystal clear on:
+
+1. **Why your `patchpal` directory appears in `demo_vulnerable_k8s_manifests`**
+2. **How the pipeline works step-by-step**
+3. **Whether this setup is correct or if it can be improved**
+
+---
+
+### ✅ 1. Why PatchPal appears inside `demo_vulnerable_k8s_manifests`
+
+You're seeing this:
+
+```
+demo_vulnerable_k8s_manifests/
+├── folder_1/
+├── folder_2/
+└── patchpal/  <-- Why is this here?
+```
+
+Because of this step in your GitHub Actions workflow:
+
+```yaml
+- name: Clone PatchPal tool
+  run: git clone --single-branch --branch ci-dev-flow https://github.com/chinmaykubal-one2n/patchpal.git
+```
+
+This clones PatchPal **into the current working directory**, which is `${{ github.workspace }}` — and **by default, that is the root of your current repository**, i.e., `demo_vulnerable_k8s_manifests`.
+
+---
+
+### ✅ 2. Is this a problem?
+
+**No**, not necessarily. You're running PatchPal as a tool *from within* the repo you're scanning. This is totally valid and even common in CI/CD pipelines (e.g., linters or fixers living in `tools/`).
+
+However, two things to be aware of:
+
+* Your `patchpal` folder will be included in the scanned directory unless you **exclude it in your tool**.
+* If `patchpal` writes to the root (like making a PR), it may include its own files in the commit/PR if you're not careful.
+
+---
+
+### ✅ 3. Ways to improve this (Optional)
+
+**Option A: Clone PatchPal to a different path**
+
+```yaml
+- name: Clone PatchPal tool
+  run: git clone --single-branch --branch ci-dev-flow https://github.com/chinmaykubal-one2n/patchpal.git tools/patchpal
+```
+
+Then change the working directory in the next step:
+
+```yaml
+- name: Run PatchPal
+  working-directory: ./tools/patchpal
+  run: go run ./cmd/main.go
+```
+
+This keeps your repo root clean.
+
+---
+
+**Option B: Make PatchPal a Go module / CLI binary**
+
+Instead of cloning PatchPal inside the repo, you could:
+
+1. Pre-build it as a Go CLI and host it as a release or install it via `go install`
+2. In the workflow, install it globally
+3. Then run it like:
+
+```yaml
+- name: Install PatchPal
+  run: go install github.com/chinmaykubal-one2n/patchpal/cmd/patchpal@ci-dev-flow
+
+- name: Run PatchPal
+  run: patchpal
+```
+
+This will require some code cleanup but will **decouple your tool from the repo being scanned**, which is cleaner and more idiomatic.
+
+---
+
+### ✅ 4. Should `REPO_PATH` be `${{ github.workspace }}`?
+
+Yes — this is **correct**. When you do:
+
+```yaml
+- uses: actions/checkout@v4
+```
+
+It clones your repo into `${{ github.workspace }}` by default.
+
+So in your app, using:
+
+```go
+RepoPath: os.Getenv("REPO_PATH") // should be github.workspace
+```
+
+is totally valid.
+
+---
+
+### ✅ Summary
+
+| Issue                | Explanation                                                              |
+| -------------------- | ------------------------------------------------------------------------ |
+| `patchpal/` shows up | Because you're cloning it inside your current repo directory             |
+| Is that bad?         | Not unless you forget to ignore that folder or commit it unintentionally |
+| Can you improve it?  | Yes — move it to `tools/patchpal/` or install it as a CLI binary         |
+
+---
+
+Would you like me to help you restructure your workflow into `tools/` or help you prepare PatchPal as a standalone CLI?

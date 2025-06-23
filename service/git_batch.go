@@ -44,12 +44,18 @@ func CreateBatchPR(fixedFiles []string) (string, error) {
 		return "", fmt.Errorf("git commit failed: %w", err)
 	}
 
-	// Step 4: Push branch
+	// Step 4: Set remote with token
+	remoteURL := fmt.Sprintf("https://%s:x-oauth-basic@github.com/%s/%s.git", githubToken, githubOwner, githubRepo)
+	if err := runGit(repoPath, "remote", "set-url", "origin", remoteURL); err != nil {
+		return "", fmt.Errorf("failed to set remote URL: %w", err)
+	}
+
+	// Step 5: Push branch
 	if err := runGit(repoPath, "push", "-u", "origin", branchName); err != nil {
 		return "", fmt.Errorf("git push failed: %w", err)
 	}
 
-	// Step 5: Create PR via GitHub API
+	// Step 6: Create PR via GitHub API
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: githubToken})
 	client := github.NewClient(oauth2.NewClient(ctx, ts))
 

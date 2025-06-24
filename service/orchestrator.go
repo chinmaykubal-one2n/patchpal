@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 	"patchpal/config"
 	"patchpal/parser"
 	"patchpal/utils"
@@ -21,19 +22,19 @@ func ProcessAndFixManifests() error {
 	var filesToCommit []string
 
 	for _, file := range allFiles {
-		fmt.Println("Processing:", file)
+		log.Println("Processing:", file)
 
 		// Step 1: Trivy Scan for misconfigurations
 		trivyJSONPath, err := ScanWithTrivy(file)
 		if err != nil {
-			fmt.Printf("Trivy scan failed for %s: %v\n", file, err)
+			log.Printf("Trivy scan failed for %s: %v", file, err)
 			continue
 		}
 
 		// Step 2: Parse Trivy JSON for relevant misconfigurations
 		misconfigs, err := parser.ExtractRelevantMisconfigs(trivyJSONPath)
 		if err != nil || len(misconfigs) == 0 {
-			fmt.Printf("No high-severity misconfigs in %s\n", file)
+			log.Printf("No high-severity misconfigs in %s", file)
 			continue
 		}
 
@@ -43,13 +44,13 @@ func ProcessAndFixManifests() error {
 
 		fixedYAML, err := llm.FixK8sManifest(ctx, prompt, file)
 		if err != nil {
-			fmt.Printf("LLM fix failed for %s: %v\n", file, err)
+			log.Printf("LLM fix failed for %s: %v", file, err)
 			continue
 		}
 
 		// Step 4: Overwrite original file with fixed YAML
 		if err := utils.OverwriteFile(file, fixedYAML); err != nil {
-			fmt.Printf("Failed to overwrite file %s: %v\n", file, err)
+			log.Printf("Failed to overwrite file %s: %v", file, err)
 			continue
 		}
 
@@ -62,7 +63,7 @@ func ProcessAndFixManifests() error {
 		if err != nil {
 			return fmt.Errorf("failed to create PR: %w", err)
 		}
-		fmt.Println("PR Created:", prURL)
+		log.Println("PR Created:", prURL)
 	}
 
 	return nil

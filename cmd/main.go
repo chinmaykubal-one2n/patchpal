@@ -1,18 +1,18 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"patchpal/config"
 	"patchpal/service"
 )
 
 func main() {
-	// Load environment variables into config
+	log.Println("[PatchPal] Loading environment variables...")
 	config.LoadEnv()
 
-	// Process and fix k8s manifests
+	log.Println("[PatchPal] Starting manifest processing and fixing...")
 	if err := service.ProcessAndFixManifests(); err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+		log.Fatalf("[PatchPal] Error: %v\n", err)
 	}
+	log.Println("[PatchPal] All manifests processed successfully.")
 }

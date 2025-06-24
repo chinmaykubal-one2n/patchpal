@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 
 	openai "github.com/sashabaranov/go-openai"
 )
@@ -26,7 +27,7 @@ func NewLLMService(apiKey string, model string) *LLMService {
 // FixK8sManifest uses the LLM to fix a Kubernetes manifest based on a vulnerability report
 // It returns the fixed YAML
 func (l *LLMService) FixK8sManifest(ctx context.Context, vulnReport string, originalYAML string) (string, error) {
-	fmt.Println("Fixing Kubernetes manifest using LLM...", vulnReport)
+	log.Println("[LLM] Sending prompt to LLM for manifest fix...")
 	prompt := fmt.Sprintf(`
 Understand Description, Message and based on Resolution make exact changes to given YAML file and nothing else, do not do anything extra to file, do not remove anything that does not concern with the trivy report.
 
@@ -58,6 +59,6 @@ For the this manifest:
 	if err != nil {
 		return "", fmt.Errorf("LLM call failed: %w", err)
 	}
-
+	log.Println("[LLM] LLM returned a response for manifest fix.")
 	return resp.Choices[0].Message.Content, nil
 }

@@ -20,6 +20,7 @@ var Config AppConfig
 
 // LoadEnv loads environment variables into the Config struct
 func LoadEnv() {
+	log.Println("[Config] Loading environment variables from .env...")
 	_ = godotenv.Load() // Load from .env if present
 
 	Config = AppConfig{
@@ -30,13 +31,15 @@ func LoadEnv() {
 		GithubRepo:       mustGet("GITHUB_REPO"),
 		RepoPath:         mustGet("REPO_PATH"),
 	}
+	log.Println("[Config] Environment variables loaded successfully.")
 }
 
 // mustGet retrieves an environment variable
 func mustGet(key string) string {
 	val := os.Getenv(key)
 	if val == "" {
-		log.Fatalf("Required environment variable %s not set", key)
+		log.Fatalf("[Config] Required environment variable %s not set", key)
 	}
+	log.Printf("[Config] Loaded %s\n", key)
 	return val
 }

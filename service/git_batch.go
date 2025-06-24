@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -25,6 +26,7 @@ func CreateBatchPR(fixedFiles []string) (string, error) {
 	ctx := context.Background()
 	branchName := fmt.Sprintf("patchpal-fix-%d", time.Now().Unix())
 
+	log.Printf("[GitBatch] Creating new branch: %s\n", branchName)
 	// Step 1: Create new branch
 	if err := runGit(repoPath, "checkout", "-b", branchName); err != nil {
 		return "", fmt.Errorf("failed to checkout new branch: %w", err)
@@ -36,21 +38,25 @@ func CreateBatchPR(fixedFiles []string) (string, error) {
 		if err != nil {
 			return "", fmt.Errorf("failed to get relative path: %w", err)
 		}
+		log.Printf("[GitBatch] Adding file to commit: %s\n", relPath)
 		if err := runGit(repoPath, "add", relPath); err != nil {
 			return "", fmt.Errorf("failed to add file: %s, error: %w", relPath, err)
 		}
 	}
 
+	log.Println("[GitBatch] Committing changes...")
 	// Step 3: Commit all changes in one commit
 	if err := runGit(repoPath, "commit", "-m", "fix: patch Kubernetes misconfigurations"); err != nil {
 		return "", fmt.Errorf("git commit failed: %w", err)
 	}
 
+	log.Println("[GitBatch] Pushing branch to origin...")
 	// Step 4: Push the new branch to origin
 	if err := runGit(repoPath, "push", "-u", "origin", branchName); err != nil {
 		return "", fmt.Errorf("git push failed: %w", err)
 	}
 
+	log.Println("[GitBatch] Creating pull request via GitHub API...")
 	// Step 5: Create a pull request using the GitHub API
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: githubToken})
 	client := github.NewClient(oauth2.NewClient(ctx, ts))

@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	log.Println("[PatchPal] Loading environment variables...")
+	// Load environment variables and configuration
 	config.LoadEnv()
 
 	log.Println("[PatchPal] Starting manifest processing and fixing...")

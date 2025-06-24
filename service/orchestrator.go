@@ -8,6 +8,8 @@ import (
 	"patchpal/utils"
 )
 
+// ProcessAndFixManifests scans all YAML files in the repo, fixes misconfigurations using LLM, and creates a PR
+// It orchestrates the full PatchPal workflow
 func ProcessAndFixManifests() error {
 	allFiles := utils.FindAllYAMLFiles(config.Config.RepoPath)
 	if len(allFiles) == 0 {
@@ -21,21 +23,21 @@ func ProcessAndFixManifests() error {
 	for _, file := range allFiles {
 		fmt.Println("Processing:", file)
 
-		// Step 1: Trivy Scan
+		// Step 1: Trivy Scan for misconfigurations
 		trivyJSONPath, err := ScanWithTrivy(file)
 		if err != nil {
 			fmt.Printf("Trivy scan failed for %s: %v\n", file, err)
 			continue
 		}
 
-		// Step 2: Parse Trivy JSON
+		// Step 2: Parse Trivy JSON for relevant misconfigurations
 		misconfigs, err := parser.ExtractRelevantMisconfigs(trivyJSONPath)
 		if err != nil || len(misconfigs) == 0 {
 			fmt.Printf("No high-severity misconfigs in %s\n", file)
 			continue
 		}
 
-		// Step 3: Format prompt and call LLM
+		// Step 3: Format prompt and call LLM to fix manifest
 		prompt := parser.FormatMisconfigsAsPrompt(misconfigs)
 		ctx := context.Background()
 
@@ -45,7 +47,7 @@ func ProcessAndFixManifests() error {
 			continue
 		}
 
-		// Step 4: Overwrite original file
+		// Step 4: Overwrite original file with fixed YAML
 		if err := utils.OverwriteFile(file, fixedYAML); err != nil {
 			fmt.Printf("Failed to overwrite file %s: %v\n", file, err)
 			continue
@@ -54,7 +56,7 @@ func ProcessAndFixManifests() error {
 		filesToCommit = append(filesToCommit, file)
 	}
 
-	// Step 5: Commit all changes and raise PR
+	// Step 5: Commit all changes and raise PR if any files were fixed
 	if len(filesToCommit) > 0 {
 		prURL, err := CreateBatchPR(filesToCommit)
 		if err != nil {

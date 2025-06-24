@@ -7,11 +7,13 @@ import (
 	openai "github.com/sashabaranov/go-openai"
 )
 
+// LLMService wraps an OpenAI client and model for LLM-based manifest fixing
 type LLMService struct {
-	Client *openai.Client
-	Model  string
+	Client *openai.Client // OpenAI client instance
+	Model  string         // Model name to use
 }
 
+// NewLLMService creates a new LLMService with the given API key and model
 func NewLLMService(apiKey string, model string) *LLMService {
 	config := openai.DefaultConfig(apiKey)
 	config.BaseURL = "https://openrouter.ai/api/v1"
@@ -21,6 +23,8 @@ func NewLLMService(apiKey string, model string) *LLMService {
 	}
 }
 
+// FixK8sManifest uses the LLM to fix a Kubernetes manifest based on a vulnerability report
+// It returns the fixed YAML
 func (l *LLMService) FixK8sManifest(ctx context.Context, vulnReport string, originalYAML string) (string, error) {
 	fmt.Println("Fixing Kubernetes manifest using LLM...", vulnReport)
 	prompt := fmt.Sprintf(`

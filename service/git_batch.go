@@ -14,6 +14,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// CreateBatchPR creates a new branch, commits fixed files, pushes the branch, and opens a pull request on GitHub
+// It returns the URL of the created pull request
 func CreateBatchPR(fixedFiles []string) (string, error) {
 	repoPath := config.Config.RepoPath
 	githubOwner := config.Config.GithubOwner
@@ -28,7 +30,7 @@ func CreateBatchPR(fixedFiles []string) (string, error) {
 		return "", fmt.Errorf("failed to checkout new branch: %w", err)
 	}
 
-	// Step 2: Add all fixed files
+	// Step 2: Add all fixed files to the new branch
 	for _, file := range fixedFiles {
 		relPath, err := filepath.Rel(repoPath, file)
 		if err != nil {
@@ -39,17 +41,17 @@ func CreateBatchPR(fixedFiles []string) (string, error) {
 		}
 	}
 
-	// Step 3: Commit once
+	// Step 3: Commit all changes in one commit
 	if err := runGit(repoPath, "commit", "-m", "fix: patch Kubernetes misconfigurations"); err != nil {
 		return "", fmt.Errorf("git commit failed: %w", err)
 	}
 
-	// Step 4: Push branch
+	// Step 4: Push the new branch to origin
 	if err := runGit(repoPath, "push", "-u", "origin", branchName); err != nil {
 		return "", fmt.Errorf("git push failed: %w", err)
 	}
 
-	// Step 5: Create PR via GitHub API
+	// Step 5: Create a pull request using the GitHub API
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: githubToken})
 	client := github.NewClient(oauth2.NewClient(ctx, ts))
 

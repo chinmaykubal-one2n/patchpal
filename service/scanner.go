@@ -8,8 +8,11 @@ import (
 	"time"
 )
 
+// TrivyResult is a generic map for holding Trivy scan results
 type TrivyResult map[string]interface{}
 
+// ScanWithTrivy runs a Trivy scan on the given filePath and outputs the results to a JSON file
+// Returns the path to the output file or an error if the scan fails
 func ScanWithTrivy(filePath string) (string, error) {
 	const tmpDir = "/home/one2n/Desktop/patchpal_out" // trivy is failing in dir /tmp
 	// Ensure Trivy is installed
@@ -20,7 +23,7 @@ func ScanWithTrivy(filePath string) (string, error) {
 	// Prepare output file path
 	outputFile := filepath.Join(tmpDir, fmt.Sprintf("trivy-out-%d.json", time.Now().UnixNano()))
 
-	// Run the Trivy command
+	// Run the Trivy command to scan the file and output JSON
 	cmd := exec.Command(
 		"trivy", "config", filePath,
 		"--format", "json",

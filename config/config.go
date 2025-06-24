@@ -10,16 +10,15 @@ import (
 type AppConfig struct {
 	OpenRouterAPIKey string
 	Model            string
-
-	GithubToken string
-	GithubOwner string
-	GithubRepo  string
-
-	RepoPath string
+	GithubToken      string
+	GithubOwner      string
+	GithubRepo       string
+	RepoPath         string // Local path to the repository
 }
 
 var Config AppConfig
 
+// LoadEnv loads environment variables into the Config struct
 func LoadEnv() {
 	_ = godotenv.Load() // Load from .env if present
 
@@ -33,6 +32,7 @@ func LoadEnv() {
 	}
 }
 
+// mustGet retrieves an environment variable
 func mustGet(key string) string {
 	val := os.Getenv(key)
 	if val == "" {

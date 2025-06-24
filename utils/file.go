@@ -6,7 +6,8 @@ import (
 	"strings"
 )
 
-// FindAllYAMLFiles recursively scans a directory and returns .yml or .yaml files
+// FindAllYAMLFiles recursively scans a directory and returns all .yml or .yaml files
+// It skips the .github folder and any files that cause errors
 func FindAllYAMLFiles(root string) []string {
 	var files []string
 
@@ -27,6 +28,7 @@ func FindAllYAMLFiles(root string) []string {
 	return files
 }
 
+// OverwriteFile writes the given content to the specified file path, overwriting it if it exists
 func OverwriteFile(path string, content string) error {
 	return os.WriteFile(path, []byte(content), 0644)
 }

@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// TrivyReport represents the structure of a Trivy JSON output for misconfigurations
 type TrivyReport struct {
 	Results []struct {
 		Target            string `json:"Target"`
@@ -31,6 +32,7 @@ type TrivyReport struct {
 	} `json:"Results"`
 }
 
+// SimplifiedMisconfig holds only the relevant fields for LLM prompt generation
 type SimplifiedMisconfig struct {
 	ID          string   `json:"id"`
 	Title       string   `json:"title"`
@@ -41,6 +43,7 @@ type SimplifiedMisconfig struct {
 	CodeLines   []string `json:"code_lines"`
 }
 
+// FormatMisconfigsAsPrompt formats misconfigurations for LLM prompt input
 func FormatMisconfigsAsPrompt(misconfigs []SimplifiedMisconfig) string {
 	var b strings.Builder
 	for _, m := range misconfigs {
@@ -50,6 +53,7 @@ func FormatMisconfigsAsPrompt(misconfigs []SimplifiedMisconfig) string {
 	return b.String()
 }
 
+// ExtractRelevantMisconfigs parses a Trivy JSON file and extracts relevant misconfigurations for fixing
 func ExtractRelevantMisconfigs(jsonPath string) ([]SimplifiedMisconfig, error) {
 	data, err := os.ReadFile(jsonPath)
 	if err != nil {

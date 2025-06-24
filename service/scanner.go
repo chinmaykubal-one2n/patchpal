@@ -16,17 +16,18 @@ type TrivyResult map[string]interface{}
 // Returns the path to the output file or an error if the scan fails
 func ScanWithTrivy(filePath string) (string, error) {
 	const tmpDir = "/home/one2n/Desktop/patchpal_out" // trivy is failing in dir /tmp
+
+	// Step 1: Ensure Trivy is installed
 	log.Printf("[Scanner] Checking for Trivy installation...")
-	// Ensure Trivy is installed
 	if _, err := exec.LookPath("trivy"); err != nil {
 		return "", fmt.Errorf("trivy not found: %v", err)
 	}
 
-	// Prepare output file path
+	// Step 2: Prepare output file path
 	outputFile := filepath.Join(tmpDir, fmt.Sprintf("trivy-out-%d.json", time.Now().UnixNano()))
 	log.Printf("[Scanner] Running Trivy scan on: %s", filePath)
 
-	// Run the Trivy command to scan the file and output JSON
+	// Step 3: Run the Trivy command to scan the file and output JSON
 	cmd := exec.Command(
 		"trivy", "config", filePath,
 		"--format", "json",

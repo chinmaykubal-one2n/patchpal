@@ -21,7 +21,7 @@ var Config AppConfig
 // LoadEnv loads environment variables into the Config struct
 func LoadEnv() {
 	log.Println("[Config] Loading environment variables from .env...")
-	_ = godotenv.Load() // Load from .env if present
+	_ = godotenv.Load()
 
 	Config = AppConfig{
 		OpenRouterAPIKey: mustGet("OPENROUTER_API_KEY"),

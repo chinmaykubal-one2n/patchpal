@@ -62,7 +62,7 @@ func CreateBatchPR(fixedFiles []string) (string, error) {
 	client := github.NewClient(oauth2.NewClient(ctx, ts))
 
 	title := "PatchPal: Fix Kubernetes Misconfigurations"
-	body := "This PR contains automated fixes for Kubernetes security misconfigurations found in multiple files."
+	body := "This PR contains automated fixes for Kubernetes security misconfigurations."
 
 	pr := &github.NewPullRequest{
 		Title: &title,

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
@@ -15,7 +16,11 @@ type TrivyResult map[string]interface{}
 // ScanWithTrivy runs a Trivy scan on the given filePath and outputs the results to a JSON file
 // Returns the path to the output file or an error if the scan fails
 func ScanWithTrivy(filePath string) (string, error) {
-	const tmpDir = "/home/one2n/Desktop/patchpal_out" // trivy is failing in dir /tmp
+	// Create a temporary directory for storing the Trivy JSON report
+	tmpDir := filepath.Join(os.TempDir(), "patchpal-trivy-json-report")
+	if err := os.MkdirAll(tmpDir, 0755); err != nil {
+		return "", fmt.Errorf("failed to create temp directory: %w", err)
+	}
 
 	// Step 1: Ensure Trivy is installed
 	log.Printf("[Scanner] Checking for Trivy installation...")

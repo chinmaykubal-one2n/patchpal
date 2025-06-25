@@ -11,7 +11,7 @@ import (
 
 // ProcessAndFixManifests scans all YAML files in the repo, fixes misconfigurations using LLM, and creates a PR
 // It orchestrates the full PatchPal workflow
-func ProcessAndFixManifests() error {
+func ProcessAndFixManifests(ctx context.Context) error {
 	allFiles := utils.FindAllYAMLFiles(config.Config.RepoPath)
 	if len(allFiles) == 0 {
 		return fmt.Errorf("no Kubernetes YAML files found in repo")
@@ -40,7 +40,6 @@ func ProcessAndFixManifests() error {
 
 		// Step 3: Format prompt and call LLM to fix manifest
 		prompt := parser.FormatMisconfigsAsPrompt(misconfigs)
-		ctx := context.Background()
 
 		fixedYAML, err := llm.FixK8sManifest(ctx, prompt, file)
 		if err != nil {
@@ -59,7 +58,7 @@ func ProcessAndFixManifests() error {
 
 	// Step 5: Commit all changes and raise PR if any files were fixed
 	if len(filesToCommit) > 0 {
-		prURL, err := CreateBatchPR(filesToCommit)
+		prURL, err := CreateBatchPR(ctx, filesToCommit)
 		if err != nil {
 			return fmt.Errorf("failed to create PR: %w", err)
 		}

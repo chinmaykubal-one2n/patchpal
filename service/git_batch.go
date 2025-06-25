@@ -17,13 +17,12 @@ import (
 
 // CreateBatchPR creates a new branch, commits fixed files, pushes the branch, and opens a pull request on GitHub
 // It returns the URL of the created pull request
-func CreateBatchPR(fixedFiles []string) (string, error) {
+func CreateBatchPR(ctx context.Context, fixedFiles []string) (string, error) {
 	repoPath := config.Config.RepoPath
 	githubOwner := config.Config.GithubOwner
 	githubRepo := config.Config.GithubRepo
 	githubToken := config.Config.GithubToken
 
-	ctx := context.Background()
 	branchName := fmt.Sprintf("patchpal-fix-%d", time.Now().Unix())
 
 	// Step 1: Create new branch

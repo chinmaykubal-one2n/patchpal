@@ -65,5 +65,5 @@ func ProcessAndFixManifests(ctx context.Context) error {
 		log.Println("PR Created:", prURL)
 	}
 
-	return nil
+	return fmt.Errorf("failed to create PR")
 }

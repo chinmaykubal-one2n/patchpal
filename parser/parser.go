@@ -51,7 +51,7 @@ func FormatMisconfigsAsPrompt(misconfigs []SimplifiedMisconfig) string {
 	for _, m := range misconfigs {
 		fmt.Fprintf(&b, "Description: %s\nMessage: %s\nSeverity: %s\nResolution: %s\n", m.Description, m.Message, m.Severity, m.Resolution)
 	}
-	log.Println("[Parser] Formatted prompt for LLM with misconfigurations.", b.String())
+	// log.Println("[Parser] Formatted prompt for LLM with misconfigurations.", b.String())
 	return b.String()
 }
 

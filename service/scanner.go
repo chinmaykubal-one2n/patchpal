@@ -25,7 +25,7 @@ func ScanWithTrivy(filePath string) (string, error) {
 
 	// Step 2: Prepare local report folder next to the YAML
 	yamlDir := filepath.Dir(filePath)
-	reportDir := filepath.Join(yamlDir, "patchpal-json-report")
+	reportDir := filepath.Join(yamlDir, "patchpal-json-reports")
 	if err := os.MkdirAll(reportDir, 0755); err != nil {
 		return "", fmt.Errorf("failed to create report directory: %w", err)
 	}
